@@ -43,7 +43,7 @@ export const registerSchema = z.object({
         .string({
           required_error: "Le numéro de téléphone est obligatoire",
         })
-        .regex(/^(?:\+33|0)[1-9](?:[0-9]{8})$/, "Format de numéro de téléphone français invalide"),
+        .regex(/^(?:\+213[5-7]\d{8}|0[5-7]\d{8})$/, "Format de numéro de téléphone algérien invalide"),
 
       role: z
         .enum(["client", "driver"], {

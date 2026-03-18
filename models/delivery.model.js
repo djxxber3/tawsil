@@ -59,6 +59,7 @@ const deliverySchema = new mongoose.Schema(
       phone: {
         type: String,
         required: [true, "Recipient phone is required"],
+        match: [/^(?:\+213[5-7]\d{8}|0[5-7]\d{8})$/, "Format de numéro de téléphone algérien invalide"],
       },
     },
     package: {
@@ -115,7 +116,7 @@ const deliverySchema = new mongoose.Schema(
       },
       currency: {
         type: String,
-        default: "DH",
+        default: "DZD",
       },
     },
     payment: {

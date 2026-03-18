@@ -85,7 +85,7 @@ export const sendVerificationEmail = async (email, code) => {
 
 export const sendPasswordResetEmail = async (email, token) => {
   try {
-    const frontendBase = process.env.FRONTEND_URL || "https://frontend-bildrive-ckhhdbfjg7g0bzhw.francecentral-01.azurewebsites.net"
+    const frontendBase = process.env.FRONTEND_URL || "http://localhost:5173"
     const resetUrl = `${frontendBase}/auth/reset-password/${token}`
 
     const subject = "Réinitialisez votre mot de passe";

@@ -18,6 +18,8 @@ const toNumber = (value) => {
   return Number.isFinite(parsed) ? parsed : null
 }
 
+const isAlgeriaAddress = (address) => String(address?.country_code || "").toLowerCase() === "dz"
+
 export const geocodeAddress = async (query) => {
   if (!query || !String(query).trim()) {
     throw createError(400, "Address query is required", {
@@ -35,6 +37,7 @@ export const geocodeAddress = async (query) => {
         format: "json",
         addressdetails: 1,
         limit: 1,
+        countrycodes: "dz",
       },
     })
 
@@ -43,6 +46,12 @@ export const geocodeAddress = async (query) => {
     if (!result) {
       throw createError(404, "Address not found", {
         code: "GEOCODE_NOT_FOUND",
+      })
+    }
+
+    if (!isAlgeriaAddress(result.address)) {
+      throw createError(400, "Only Algerian addresses are supported", {
+        code: "ADDRESS_OUTSIDE_ALGERIA",
       })
     }
 
@@ -100,6 +109,12 @@ export const reverseGeocode = async (lat, lng) => {
     if (!data || (!data.display_name && !data.address)) {
       throw createError(404, "Address not found", {
         code: "REVERSE_GEOCODE_NOT_FOUND",
+      })
+    }
+
+    if (!isAlgeriaAddress(data.address)) {
+      throw createError(400, "Only Algerian addresses are supported", {
+        code: "ADDRESS_OUTSIDE_ALGERIA",
       })
     }
 

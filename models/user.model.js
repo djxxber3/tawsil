@@ -36,6 +36,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "Phone number is required"],
       trim: true,
+      match: [/^(?:\+213[5-7]\d{8}|0[5-7]\d{8})$/, "Format de numéro de téléphone algérien invalide"],
     },
     profilePicture: {
       type: String,

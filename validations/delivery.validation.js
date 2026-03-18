@@ -30,7 +30,7 @@ export const createDeliverySchema = z.object({
   dropoff: locationPointSchema,
   recipient: z.object({
     name: z.string().min(2).max(120),
-    phone: z.string().min(6).max(25),
+    phone: z.string().regex(/^(?:\+213[5-7]\d{8}|0[5-7]\d{8})$/, "Format de numéro de téléphone algérien invalide"),
   }),
   package: packageSchema,
   deliveryNote: z.string().max(500).optional(),
