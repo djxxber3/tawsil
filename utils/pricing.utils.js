@@ -1,0 +1,121 @@
+
+export const calculateRidePrice = (distance, duration, vehicleType) => {
+    
+    const basePrices = {
+      standard: 2.5,
+      comfort: 3.5,
+      premium: 5.0,
+      van: 4.5,
+    }
+  
+    
+    const pricePerKm = {
+      standard: 1.2,
+      comfort: 1.5,
+      premium: 2.0,
+      van: 1.8,
+    }
+  
+    const pricePerMinute = {
+      standard: 0.25,
+      comfort: 0.3,
+      premium: 0.4,
+      van: 0.35,
+    }
+  
+    const base = basePrices[vehicleType] || basePrices.standard
+    const distancePrice = (pricePerKm[vehicleType] || pricePerKm.standard) * distance
+    const timePrice = (pricePerMinute[vehicleType] || pricePerMinute.standard) * duration
+  
+    const total = base + distancePrice + timePrice
+  
+  
+    const roundedTotal = Math.round(total * 100) / 100
+  
+    return {
+      base,
+      distance: distancePrice,
+      time: timePrice,
+      total: roundedTotal,
+    }
+  }
+  
+ 
+  export const calculateDeliveryPrice = (distance, packageSize, packageWeight) => {
+    
+    const basePrices = {
+      small: 3.0,
+      medium: 4.5,
+      large: 6.0,
+    }
+  
+    
+    const pricePerKm = 1.0
+  
+    const weightPrices = {
+      "0-1": 0,
+      "1-5": 2.0,
+      "5-10": 4.0,
+      "10-20": 7.0,
+      "20+": 12.0,
+    }
+  
+    const base = basePrices[packageSize] || basePrices.medium
+    const distancePrice = pricePerKm * distance
+    const weightPrice = weightPrices[packageWeight] || weightPrices["1-5"]
+  
+   
+    const total = base + distancePrice + weightPrice
+
+    const roundedTotal = Math.round(total * 100) / 100
+  
+    return {
+      base,
+      distance: distancePrice,
+      weight: weightPrice,
+      total: roundedTotal,
+    }
+  }
+
+export const DEFAULT_DELIVERY_PRICING_CONFIG = {
+  baseFee: 12,
+  perKmFee: 3,
+  sizeSurcharge: {
+    small: 0,
+    medium: 4,
+    large: 8,
+    xlarge: 14,
+  },
+  urgentSurcharge: 10,
+  weightFeePerKg: 0.75,
+  maxWeightFee: 25,
+}
+
+export const calculateDeliveryMvpPrice = ({
+  distanceKm,
+  sizeCategory,
+  weightKg = 0,
+  isUrgent = false,
+  config = DEFAULT_DELIVERY_PRICING_CONFIG,
+}) => {
+  const safeDistance = Math.max(0, Number(distanceKm) || 0)
+  const safeWeight = Math.max(0, Number(weightKg) || 0)
+
+  const baseFee = config.baseFee
+  const distanceFee = safeDistance * config.perKmFee
+  const sizeSurcharge = config.sizeSurcharge[sizeCategory] || 0
+  const weightSurcharge = Math.min(safeWeight * config.weightFeePerKg, config.maxWeightFee)
+  const urgentSurcharge = isUrgent ? config.urgentSurcharge : 0
+
+  const estimatedPrice = Math.round((baseFee + distanceFee + sizeSurcharge + weightSurcharge + urgentSurcharge) * 100) / 100
+
+  return {
+    baseFee,
+    distanceFee: Math.round(distanceFee * 100) / 100,
+    sizeSurcharge,
+    weightSurcharge: Math.round(weightSurcharge * 100) / 100,
+    urgentSurcharge,
+    estimatedPrice,
+  }
+}
+  

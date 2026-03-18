@@ -1,0 +1,72 @@
+import { getRouteDistance } from "./maps-routing.utils.js"
+import {
+  geocodeAddress as geocodeAddressByNominatim,
+  reverseGeocode as reverseGeocodeByNominatim,
+} from "./maps-geocode.utils.js"
+
+const formatDistanceText = (distanceMeters) => `${(distanceMeters / 1000).toFixed(1)} km`
+const formatDurationText = (durationSeconds) => `${Math.ceil(durationSeconds / 60)} mins`
+
+export const getDistance = async (origin, destination) => {
+  const { distanceMeters, durationSeconds } = await getRouteDistance(origin, destination)
+
+  return {
+    distance: distanceMeters,
+    distanceText: formatDistanceText(distanceMeters),
+    duration: durationSeconds,
+    durationText: formatDurationText(durationSeconds),
+    durationInTraffic: durationSeconds,
+    durationInTrafficText: formatDurationText(durationSeconds),
+  }
+}
+
+export const getDirections = async (origin, destination, waypoints = []) => {
+  const base = await getDistance(origin, destination)
+
+  return {
+    ...base,
+    polyline: null,
+    steps: [],
+    bounds: null,
+    copyrights: "OpenStreetMap contributors",
+    warnings: waypoints.length > 0 ? ["Waypoints are not expanded in the current routing provider adapter"] : [],
+  }
+}
+
+export const geocodeAddress = async (address) => {
+  const result = await geocodeAddressByNominatim(address)
+
+  return {
+    coordinates: [result.lng, result.lat],
+    formattedAddress: result.displayName,
+    placeId: null,
+    types: [],
+    addressComponents: [],
+    bounds: null,
+    locationType: null,
+  }
+}
+
+export const reverseGeocode = async (coordinates) => {
+  const [lng, lat] = coordinates
+  const result = await reverseGeocodeByNominatim(lat, lng)
+
+  return [
+    {
+      formattedAddress: result.displayName,
+      placeId: null,
+      types: [],
+      addressComponents: [],
+    },
+  ]
+}
+
+
+
+
+
+
+
+
+
+
