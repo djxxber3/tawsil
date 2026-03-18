@@ -1,12 +1,16 @@
 import axios from "axios"
 import { createError } from "./error.utils.js"
 import {
-  NOMINATIM_BASE_URL,
-  NOMINATIM_USER_AGENT,
+  LOCATIONIQ_API_KEY,
+  LOCATIONIQ_BASE_URL,
 } from "../config/maps.config.js"
 
-const requestHeaders = {
-  "User-Agent": NOMINATIM_USER_AGENT,
+const ensureLocationIqKey = () => {
+  if (!LOCATIONIQ_API_KEY) {
+    throw createError(500, "Geocoding service is not configured", {
+      code: "GEOCODING_PROVIDER_NOT_CONFIGURED",
+    })
+  }
 }
 
 const toNumber = (value) => {
@@ -21,14 +25,17 @@ export const geocodeAddress = async (query) => {
     })
   }
 
+  ensureLocationIqKey()
+
   try {
-    const response = await axios.get(`${NOMINATIM_BASE_URL}/search`, {
+    const response = await axios.get(`${LOCATIONIQ_BASE_URL}/search.php`, {
       params: {
+        key: LOCATIONIQ_API_KEY,
         q: query,
-        format: "jsonv2",
+        format: "json",
+        addressdetails: 1,
         limit: 1,
       },
-      headers: requestHeaders,
     })
 
     const result = Array.isArray(response?.data) ? response.data[0] : null
@@ -75,14 +82,17 @@ export const reverseGeocode = async (lat, lng) => {
     })
   }
 
+  ensureLocationIqKey()
+
   try {
-    const response = await axios.get(`${NOMINATIM_BASE_URL}/reverse`, {
+    const response = await axios.get(`${LOCATIONIQ_BASE_URL}/reverse.php`, {
       params: {
+        key: LOCATIONIQ_API_KEY,
         lat: safeLat,
         lon: safeLng,
-        format: "jsonv2",
+        format: "json",
+        addressdetails: 1,
       },
-      headers: requestHeaders,
     })
 
     const data = response?.data
@@ -99,7 +109,7 @@ export const reverseGeocode = async (lat, lng) => {
       displayName: data.display_name || "",
       address: {
         road: data.address?.road || null,
-        city: data.address?.city || data.address?.town || data.address?.village || null,
+        city: data.address?.city || data.address?.town || data.address?.village || data.address?.county || null,
         state: data.address?.state || null,
         postcode: data.address?.postcode || null,
         country: data.address?.country || null,

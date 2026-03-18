@@ -2,6 +2,30 @@ import dotenv from "dotenv"
 dotenv.config()
 import nodemailer from "nodemailer";
 
+const EMAIL_APP_NAME = (process.env.EMAIL_APP_NAME || "TawsilGO").trim()
+const EMAIL_FROM_NAME = (process.env.EMAIL_FROM_NAME || EMAIL_APP_NAME).trim()
+const EMAIL_PRIMARY_COLOR = (process.env.EMAIL_PRIMARY_COLOR || "#FF6500").trim()
+const EMAIL_SUPPORT_CONTACT = (process.env.EMAIL_SUPPORT_CONTACT || process.env.EMAIL_FROM || "").trim()
+
+const buildFromAddress = () => `"${EMAIL_FROM_NAME}" <${process.env.EMAIL_FROM}>`
+
+const buildEmailLayout = (contentHtml) => `
+  <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+    <div style="background-color: ${EMAIL_PRIMARY_COLOR}; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
+      <h1 style="color: white; margin: 0; font-size: 24px;">${EMAIL_APP_NAME}</h1>
+    </div>
+    <div style="background-color: #f9f9f9; padding: 30px; border-radius: 0 0 8px 8px;">
+      ${contentHtml}
+      <hr style="margin: 30px 0; border: none; border-top: 1px solid #e0e0e0;">
+      <p style="color: #666; font-size: 14px; margin: 0;">
+        Cordialement,<br>
+        L'equipe ${EMAIL_APP_NAME}
+      </p>
+      ${EMAIL_SUPPORT_CONTACT ? `<p style="color: #666; font-size: 13px; margin-top: 12px;">Support: ${EMAIL_SUPPORT_CONTACT}</p>` : ""}
+    </div>
+  </div>
+`
+
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
   port: Number(process.env.EMAIL_PORT), 
@@ -21,13 +45,13 @@ export const sendVerificationEmail = async (email, code) => {
 
     const htmlMessage = `
       <div style="font-size: 16px; line-height: 1.6; color: #333;">
-        <p style="color: #28a745; font-weight: bold; margin-bottom: 20px;">Bienvenue sur Bildrive !</p>
+        <p style="color: #28a745; font-weight: bold; margin-bottom: 20px;">Bienvenue sur ${EMAIL_APP_NAME} !</p>
 
         <p>Merci de vous être inscrit. Pour finaliser votre inscription, veuillez confirmer votre adresse email.</p>
 
         <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
           <p style="margin: 8px 0; text-align: center;">
-            <strong style="color: #FF6500;">Utilisez ce code de verification :</strong>
+            <strong style="color: ${EMAIL_PRIMARY_COLOR};">Utilisez ce code de verification :</strong>
           </p>
           <p style="text-align: center; font-size: 32px; letter-spacing: 6px; margin: 12px 0; font-weight: bold; color: #222;">${code}</p>
         </div>
@@ -45,24 +69,10 @@ export const sendVerificationEmail = async (email, code) => {
     `;
 
     const mailOptions = {
-      from: `"Bildrive" <${process.env.EMAIL_FROM}>`,
+      from: buildFromAddress(),
       to: email,
       subject: subject,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <div style="background-color: #FF6500; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
-            <h1 style="color: white; margin: 0; font-size: 24px;">Bildrive</h1>
-          </div>
-          <div style="background-color: #f9f9f9; padding: 30px; border-radius: 0 0 8px 8px;">
-            ${htmlMessage}
-            <hr style="margin: 30px 0; border: none; border-top: 1px solid #e0e0e0;">
-            <p style="color: #666; font-size: 14px; margin: 0;">
-              Cordialement,<br>
-              L'équipe Bildrive
-            </p>
-          </div>
-        </div>
-      `,
+      html: buildEmailLayout(htmlMessage),
     };
 
     await transporter.sendMail(mailOptions);
@@ -88,7 +98,7 @@ export const sendPasswordResetEmail = async (email, token) => {
 
         <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
           <p style="margin: 8px 0; text-align: center;">
-            <strong style="color: #FF6500;">Cliquez sur le bouton ci-dessous pour réinitialiser votre mot de passe</strong>
+            <strong style="color: ${EMAIL_PRIMARY_COLOR};">Cliquez sur le bouton ci-dessous pour réinitialiser votre mot de passe</strong>
           </p>
         </div>
 
@@ -112,24 +122,10 @@ export const sendPasswordResetEmail = async (email, token) => {
     `;
 
     const mailOptions = {
-      from: `"Bildrive" <${process.env.EMAIL_FROM}>`,
+      from: buildFromAddress(),
       to: email,
       subject: subject,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <div style="background-color: #FF6500; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
-            <h1 style="color: white; margin: 0; font-size: 24px;">Bildrive</h1>
-          </div>
-          <div style="background-color: #f9f9f9; padding: 30px; border-radius: 0 0 8px 8px;">
-            ${htmlMessage}
-            <hr style="margin: 30px 0; border: none; border-top: 1px solid #e0e0e0;">
-            <p style="color: #666; font-size: 14px; margin: 0;">
-              Cordialement,<br>
-              L'équipe Bildrive
-            </p>
-          </div>
-        </div>
-      `,
+      html: buildEmailLayout(htmlMessage),
     }
 
     await transporter.sendMail(mailOptions)
@@ -143,24 +139,10 @@ export const sendPasswordResetEmail = async (email, token) => {
 export const sendNotificationEmail = async (email, subject, htmlMessage) => {
   try {
     const mailOptions = {
-      from: `"Bildrive" <${process.env.EMAIL_FROM}>`,
+      from: buildFromAddress(),
       to: email,
       subject: subject,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <div style="background-color: #FF6500; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
-            <h1 style="color: white; margin: 0; font-size: 24px;">Bildrive</h1>
-          </div>
-          <div style="background-color: #f9f9f9; padding: 30px; border-radius: 0 0 8px 8px;">
-            ${htmlMessage}
-            <hr style="margin: 30px 0; border: none; border-top: 1px solid #e0e0e0;">
-            <p style="color: #666; font-size: 14px; margin: 0;">
-              Cordialement,<br>
-              L'équipe Bildrive
-            </p>
-          </div>
-        </div>
-      `,
+      html: buildEmailLayout(htmlMessage),
     };
 
     await transporter.sendMail(mailOptions);

@@ -1,7 +1,7 @@
 import { getRouteDistance } from "./maps-routing.utils.js"
 import {
-  geocodeAddress as geocodeAddressByNominatim,
-  reverseGeocode as reverseGeocodeByNominatim,
+  geocodeAddress as geocodeAddressByProvider,
+  reverseGeocode as reverseGeocodeByProvider,
 } from "./maps-geocode.utils.js"
 
 const formatDistanceText = (distanceMeters) => `${(distanceMeters / 1000).toFixed(1)} km`
@@ -34,7 +34,7 @@ export const getDirections = async (origin, destination, waypoints = []) => {
 }
 
 export const geocodeAddress = async (address) => {
-  const result = await geocodeAddressByNominatim(address)
+  const result = await geocodeAddressByProvider(address)
 
   return {
     coordinates: [result.lng, result.lat],
@@ -49,7 +49,7 @@ export const geocodeAddress = async (address) => {
 
 export const reverseGeocode = async (coordinates) => {
   const [lng, lat] = coordinates
-  const result = await reverseGeocodeByNominatim(lat, lng)
+  const result = await reverseGeocodeByProvider(lat, lng)
 
   return [
     {
