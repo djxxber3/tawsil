@@ -452,7 +452,18 @@ export const acceptDelivery = async (req, res, next) => {
       return next(createError(404, "Driver profile not found"))
     }
 
-    if (!driver.isAvailable || !driver.isVerified || driver.status !== "approved") {
+    // Legacy records may have pending status / unverified driver flag even after user email verification.
+    // For MVP flow we allow driver acceptance when user account is verified and there is no active assignment.
+    const hasNoActiveRide = !driver.currentRide
+    const isOperationalStatus = driver.status === "approved" || driver.status === "pending"
+    const isVerifiedForOperations = driver.isVerified || req.user.isVerified === true
+
+    if (!driver.isAvailable && hasNoActiveRide) {
+      driver.isAvailable = true
+      await driver.save()
+    }
+
+    if (!driver.isAvailable || !isOperationalStatus || !isVerifiedForOperations) {
       return next(createError(403, "Driver is not eligible to accept deliveries"))
     }
 
