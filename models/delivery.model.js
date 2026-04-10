@@ -17,6 +17,11 @@ const deliverySchema = new mongoose.Schema(
       ref: "Trip",
       default: null,
     },
+    capacityReserved: {
+      type: Boolean,
+      default: false,
+      select: false,
+    },
     pickup: {
       address: {
         type: String,

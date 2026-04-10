@@ -64,6 +64,11 @@ const driverSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    currentRide: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Delivery",
+      default: null,
+    },
     currentLocation: {
       type: {
         type: String,

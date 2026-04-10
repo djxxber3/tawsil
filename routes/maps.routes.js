@@ -17,8 +17,18 @@ const sendRouteError = (res, error, fallbackMessage) => {
   })
 }
 
-router.post('/distance', async (req, res) => {
-  try {
+const withPublicMapHandler = (label, fallbackMessage, handler) => {
+  return async (req, res) => {
+    try {
+      await handler(req, res)
+    } catch (error) {
+      console.error(`Error in ${label} route:`, error)
+      return sendRouteError(res, error, fallbackMessage)
+    }
+  }
+}
+
+router.post('/distance', withPublicMapHandler('distance', 'Failed to calculate distance', async (req, res) => {
     const { origin, destination } = req.body;
     
     if (!origin || !destination) {
@@ -34,15 +44,10 @@ router.post('/distance', async (req, res) => {
       success: true,
       data: result
     });
-  } catch (error) {
-    console.error('Error in distance route:', error);
-    return sendRouteError(res, error, 'Failed to calculate distance')
-  }
-});
+  }))
 
 // Get directions between two points
-router.post('/directions', async (req, res) => {
-  try {
+router.post('/directions', withPublicMapHandler('directions', 'Failed to get directions', async (req, res) => {
     const { origin, destination, waypoints = [] } = req.body;
     
     if (!origin || !destination) {
@@ -58,15 +63,10 @@ router.post('/directions', async (req, res) => {
       success: true,
       data: result
     });
-  } catch (error) {
-    console.error('Error in directions route:', error);
-    return sendRouteError(res, error, 'Failed to get directions')
-  }
-});
+  }))
 
 // Geocode an address
-router.post('/geocode', async (req, res) => {
-  try {
+router.post('/geocode', withPublicMapHandler('geocode', 'Failed to geocode address', async (req, res) => {
     const { address } = req.body;
     
     if (!address) {
@@ -82,15 +82,10 @@ router.post('/geocode', async (req, res) => {
       success: true,
       data: result
     });
-  } catch (error) {
-    console.error('Error in geocode route:', error);
-    return sendRouteError(res, error, 'Failed to geocode address')
-  }
-});
+  }))
 
 // Reverse geocode coordinates
-router.post('/reverse-geocode', async (req, res) => {
-  try {
+router.post('/reverse-geocode', withPublicMapHandler('reverse geocode', 'Failed to reverse geocode coordinates', async (req, res) => {
     const { coordinates } = req.body;
     
     if (!coordinates || !Array.isArray(coordinates) || coordinates.length !== 2) {
@@ -106,11 +101,7 @@ router.post('/reverse-geocode', async (req, res) => {
       success: true,
       data: result
     });
-  } catch (error) {
-    console.error('Error in reverse geocode route:', error);
-    return sendRouteError(res, error, 'Failed to reverse geocode coordinates')
-  }
-});
+  }))
 
 
 export default router;

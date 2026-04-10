@@ -25,7 +25,12 @@ export const validateRequest = (schema) => {
           message: err.message,
         }))
 
-        return next(createError(400, "Validation failed", errors))
+        const failureReason =
+          errors.length > 0
+            ? errors.map((err) => `${err.field ? `${err.field}: ` : ""}${err.message}`).join("; ")
+            : "Validation error"
+
+        return next(createError(400, failureReason, errors))
       }
 
       if (expectsRequestShape) {

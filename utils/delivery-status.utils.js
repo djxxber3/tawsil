@@ -16,10 +16,11 @@ export const DELIVERY_STATUS = {
 
 const ALLOWED_TRANSITIONS = {
   [DELIVERY_STATUS.DRAFT]: [DELIVERY_STATUS.PENDING, DELIVERY_STATUS.CANCELLED_BY_USER],
+  // Per-driver rejections must use delivery.rejectedBy while keeping status Pending.
+  // Global Rejected transition is intentionally disabled until a dedicated internal flow exists.
   [DELIVERY_STATUS.PENDING]: [
     DELIVERY_STATUS.ACCEPTED,
     DELIVERY_STATUS.CANCELLED_BY_USER,
-    DELIVERY_STATUS.REJECTED,
   ],
   [DELIVERY_STATUS.ACCEPTED]: [
     DELIVERY_STATUS.DRIVER_ARRIVED_PICKUP,
@@ -66,4 +67,8 @@ export const isTerminalDeliveryStatus = (status) => {
     DELIVERY_STATUS.FAILED_DELIVERY,
     DELIVERY_STATUS.REFUNDED,
   ].includes(status)
+}
+
+export const isGlobalDeliveryRejectionStatus = (status) => {
+  return status === DELIVERY_STATUS.REJECTED
 }

@@ -1,4 +1,4 @@
-import { getRouteDistance } from "./maps-routing.utils.js"
+import { getRouteDirections, getRouteDistance } from "./maps-routing.utils.js"
 import {
   geocodeAddress as geocodeAddressByProvider,
   reverseGeocode as reverseGeocodeByProvider,
@@ -21,15 +21,23 @@ export const getDistance = async (origin, destination) => {
 }
 
 export const getDirections = async (origin, destination, waypoints = []) => {
-  const base = await getDistance(origin, destination)
+  const route = await getRouteDirections(origin, destination, waypoints)
 
   return {
-    ...base,
-    polyline: null,
-    steps: [],
+    distance: route.distanceMeters,
+    distanceText: formatDistanceText(route.distanceMeters),
+    duration: route.durationSeconds,
+    durationText: formatDurationText(route.durationSeconds),
+    durationInTraffic: route.durationSeconds,
+    durationInTrafficText: formatDurationText(route.durationSeconds),
+    polyline: route.polyline,
+    geometry: route.geometry,
+    routes: route.routes,
+    legs: route.legs,
+    steps: route.steps,
     bounds: null,
     copyrights: "OpenStreetMap contributors",
-    warnings: waypoints.length > 0 ? ["Waypoints are not expanded in the current routing provider adapter"] : [],
+    warnings: route.warnings,
   }
 }
 
